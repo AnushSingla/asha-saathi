@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+  backend:
+      build: ./server
+      container_name: asha-backend
+      ports:
+        - "8000:8000"
+      env_file:
+        - "./server/.env"
+      restart: always
+  frontend:
+      build: ./client
+      container_name: asha-frontend
+      ports:
+        - "3000:80"
+      depends_on:
+       - backend
+      environment:
+        - VITE_BACKEND_URL=http://backend:8000
+      restart: always
