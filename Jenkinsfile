@@ -15,13 +15,19 @@ pipeline {
             }
         }
         stage('Prepare Workspace') {
-    steps {
-        sh 'git reset --hard'
-        sh 'git clean -fd'
-        sh 'git checkout main'
-        sh 'git pull'
-    }
-}
+            steps {
+                
+                sh 'git checkout main'
+               
+                sh 'git fetch origin' 
+                
+               
+                sh 'git reset --hard origin/main' 
+                
+               
+                sh 'git clean -fd'
+            }
+        }
 
 
         stage('Version Bump') {
