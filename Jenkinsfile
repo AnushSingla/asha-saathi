@@ -97,16 +97,24 @@ pipeline {
 
         stage('Deploy to Staging') {
             steps {
-                script {
-                    deployDocker("${BACKEND_IMG}", "asha-backend-staging", "8001:8000",[
-                    env: [
-                    "OPENAI_API_KEY=${OPENAI_API_KEY_CRED}",
-                    "MONGO_URL=${MONGO_URL_CRED}",
-                    "JWT_SECRET=${JWT_SECRET_CRED}",
-                    "GROQ_KEY=${GROQ_KEY_CRED}"
-                ]
+                // *** FIX APPLIED HERE ***
+                // We load all the secret credentials into variables
+                withCredentials([
+                    string(credentialsId: 'MONGO_URL_CRED', variable: 'MONGO_URL'),
+                    string(credentialsId: 'JWT_SECRET_CRED', variable: 'JWT_SECRET'),
+                    string(credentialsId: 'GROQ_KEY_CRED', variable: 'GROQ_KEY')
+                ]) {
+                    script {
+                        // Now we use the new variables (e.g., $OPENAI_KEY)
+                        deployDocker("${BACKEND_IMG}", "asha-backend-staging", "8001:8000",[
+                        env: [
+                        "MONGO_URL=${MONGO_URL}",
+                        "JWT_SECRET=${JWT_SECRET}",
+                        "GROQ_KEY=${GROQ_KEY}"
+                        ]
 
-                    ])
+                        ])
+                    }
                 }
             }
         }
@@ -121,16 +129,23 @@ pipeline {
 
         stage('Deploy to Production') {
             steps {
-                script {
-                    deployDocker("${BACKEND_IMG}", "asha-backend", "8000:8000",[                
-                    env: [
-                    "OPENAI_API_KEY=${OPENAI_API_KEY_CRED}",
-                    "MONGO_URL=${MONGO_URL_CRED}",
-                    "JWT_SECRET=${JWT_SECRET_CRED}",
-                    "GROQ_KEY=${GROQ_KEY_CRED}"
-                ]
-])
-                    deployDocker("${FRONTEND_IMG}", "asha-frontend", "3000:80")
+                
+                withCredentials([
+                    string(credentialsId: 'MONGO_URL_CRED', variable: 'MONGO_URL'),
+                    string(credentialsId: 'JWT_SECRET_CRED', variable: 'JWT_SECRET'),
+                    string(credentialsId: 'GROQ_KEY_CRED', variable: 'GROQ_KEY')
+                ]) {
+                    script {
+                        // Use the new variables
+                        deployDocker("${BACKEND_IMG}", "asha-backend", "8000:8000",[ 
+                        env: [
+                        "MONGO_URL=${MONGO_URL}",
+                        "JWT_SECRET=${JWT_SECRET}",
+                        "GROQ_KEY=${GROQ_KEY}"
+                        ]
+                        ])
+                        deployDocker("${FRONTEND_IMG}", "asha-frontend", "3000:80")
+                    }
                 }
             }
         }
