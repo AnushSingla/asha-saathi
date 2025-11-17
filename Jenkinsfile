@@ -98,7 +98,15 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 script {
-                    deployDocker("${BACKEND_IMG}", "asha-backend-staging", "8001:8000")
+                    deployDocker("${BACKEND_IMG}", "asha-backend-staging", "8001:8000",[
+                    env: [
+                    "OPENAI_API_KEY=${OPENAI_API_KEY_CRED}",
+                    "MONGO_URL=${MONGO_URL_CRED}",
+                    "JWT_SECRET=${JWT_SECRET_CRED}",
+                    "GROQ_KEY=${GROQ_KEY_CRED}"
+                ]
+
+                    ])
                 }
             }
         }
@@ -114,7 +122,14 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 script {
-                    deployDocker("${BACKEND_IMG}", "asha-backend", "8000:8000")
+                    deployDocker("${BACKEND_IMG}", "asha-backend", "8000:8000",[                
+                    env: [
+                    "OPENAI_API_KEY=${OPENAI_API_KEY_CRED}",
+                    "MONGO_URL=${MONGO_URL_CRED}",
+                    "JWT_SECRET=${JWT_SECRET_CRED}",
+                    "GROQ_KEY=${GROQ_KEY_CRED}"
+                ]
+])
                     deployDocker("${FRONTEND_IMG}", "asha-frontend", "3000:80")
                 }
             }
