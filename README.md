@@ -43,13 +43,12 @@ ASHA-SAATHI is a MERN + AI powered platform designed to assist ASHA workers by p
 
 # 📦 Project Structure
 
-/backend → Node.js + Express + AI services
-/frontend → React + Tailwind
+/server → Node.js + Express + AI services
+/client → React + Tailwind
 /Jenkinsfile → Jenkins CI/CD pipeline
 /Dockerfile(s) → Multi-stage frontend & backend builds
 
-yaml
-Copy code
+
 
 ---
 
