@@ -18,6 +18,16 @@ const UserSchema = new mongoose.Schema(
             type: String,
             enum: ["user", "admin"],
             default: "user",
+        },
+        totalReports: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        lastSettledReportCount: {
+            type: Number,
+            default: 0,
+            min: 0,
         }
     },{timestamps:true}
 )

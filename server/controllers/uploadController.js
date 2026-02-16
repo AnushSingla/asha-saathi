@@ -1,8 +1,13 @@
 const openai = require("../api/GroqClient");
 const Tesseract = require('tesseract.js');
 const fs = require('fs');
+const User = require("../models/User");
 
 exports.Upload = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "Report file is required" });
+  }
+
   const filePath = req.file.path;
 
   try {
@@ -10,10 +15,6 @@ exports.Upload = async (req, res) => {
     const result = await Tesseract.recognize(filePath, 'eng');
     const rawtext = result.data.text;
 
-    
-    fs.unlinkSync(filePath);
-
-    
     const hindiprompt = `तुम एक सहायक चिकित्सा सहायक हो। नीचे दिए गए मेडिकल रिपोर्ट को सरल, स्पष्ट और पेशेवर हिंदी (देवनागरी लिपि) में संक्षेपित करो।
 
 • उत्तर बिंदुवार (•) में दो  
@@ -101,6 +102,10 @@ Only return the bullet-point summary of the report.
     const englishsummary = englishresponse.choices[0].message.content;
     const medsummary = medresponse.choices[0].message.content;
 
+    if (req.user && req.user.userId) {
+      await User.findByIdAndUpdate(req.user.userId, { $inc: { totalReports: 1 } });
+    }
+
   
 
     // 📤 Return both raw OCR and Hindi summary
@@ -109,5 +114,9 @@ Only return the bullet-point summary of the report.
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "OCR or AI summarization failed." });
+  } finally {
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
   }
 };

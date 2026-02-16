@@ -11,7 +11,7 @@ const Upload = () => {
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("English");
   const[phone,setPhone]= useState("");
-  const[count,setCount]=useState(0);
+  const navigate = useNavigate();
   
   
 
@@ -23,11 +23,22 @@ const Upload = () => {
     formdata.append("report", file);
     formdata.append("phone", phone);
     try {
+      const token = localStorage.getItem("token");
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/upload`, {
         method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formdata,
       });
+      if (res.status === 401) {
+        alert("Please login first.");
+        navigate("/login");
+        return;
+      }
       const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Upload failed.");
+        return;
+      }
       setRawText(data.text || "");
       setEnglishSummary(data.englishsummary || "");
       setHindiSummary(data.hindisummary);
@@ -43,17 +54,6 @@ const Upload = () => {
   e.preventDefault();
 
   if (!medSummary) return alert("No medications extracted yet!");
-
-  const username = localStorage.getItem("username");
-  if (!username) return alert("User not found!");
-
- 
-  const savedCount = Number(localStorage.getItem(`count_${username}`)) || 0;
-
-  
-  const newCount = savedCount + 1;
-  localStorage.setItem(`count_${username}`, newCount);
-  setCount(newCount);
 
   
   const message = `Patient Medications\n\n${medSummary}`;
