@@ -10,16 +10,28 @@ const Account = () => {
   const [payment, setPayment] = useState(0);
   const [sentRequest, setSentRequest] = useState(false);
   const [statusPayment, setStatusPayment] = useState(false);
+  const token = localStorage.getItem("token");
 
-  // ✅ Payment request to Admin
+  const getAuthHeaders = () => {
+    if (!token) return {};
+    return { Authorization: `Bearer ${token}` };
+  };
+
   const handlePayment = async (e) => {
     e.preventDefault();
+    if (!token) {
+      alert("Please login first.");
+      navigate("/login");
+      return;
+    }
+
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/request`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, count, credits, payment }),
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ count, credits, payment }),
       });
+      const data = await response.json();
 
       if (response.ok) {
         setSentRequest(true);
@@ -27,8 +39,11 @@ const Account = () => {
         setTimeout(() => {
           navigate("/home");
         }, 1000);
+      } else if (response.status === 401) {
+        alert("Session expired. Please login again.");
+        navigate("/login");
       } else {
-        alert("Payment request failed");
+        alert(data.message || "Payment request failed");
       }
     } catch (error) {
       console.error("Payment Request Error:", error);
@@ -36,13 +51,17 @@ const Account = () => {
     }
   };
 
-  // ✅ Clear payment + reset counts but keep username
   const handleReset = async () => {
+    if (!token) {
+      alert("Please login first.");
+      navigate("/login");
+      return;
+    }
+
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment/reset`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username }),
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
       });
 
       const data = await res.json();
@@ -64,6 +83,9 @@ const Account = () => {
         localStorage.setItem(`count_${username}`, 0);
 
         alert("Payment cleared! You can start new summaries now.");
+      } else if (res.status === 401) {
+        alert("Session expired. Please login again.");
+        navigate("/login");
       } else {
         console.warn("Reset failed:", data);
         alert(`Payment reset failed: ${data.message || data.error || "Unknown error"}`);
@@ -74,7 +96,6 @@ const Account = () => {
     }
   };
 
-  // ✅ Load username from localStorage
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
     if (storedUsername && storedUsername !== "undefined") {
@@ -82,7 +103,6 @@ const Account = () => {
     }
   }, []);
 
-  // ✅ Load saved count/credits/payment from localStorage
   useEffect(() => {
     const savedUsername = localStorage.getItem("username");
     if (savedUsername) {
@@ -97,49 +117,36 @@ const Account = () => {
     }
   }, []);
 
-  // ✅ Check if payment is pending
   useEffect(() => {
     const checkPaymentStatus = async () => {
-      if (!username) return;
-      try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment`);
-        const data = await res.json();
+      if (!username || !token) return;
 
-        const userPayment = data.find((p) => p.username === username);
-        if (userPayment && userPayment.status === "pending") {
-          setSentRequest(true);
-        } else {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment/me`, {
+          headers: getAuthHeaders(),
+        });
+
+        if (res.status === 404) {
           setSentRequest(false);
+          setStatusPayment(false);
+          return;
         }
+
+        if (res.status === 401) {
+          navigate("/login");
+          return;
+        }
+
+        const data = await res.json();
+        setSentRequest(data.status === "pending");
+        setStatusPayment(data.status === "approved");
       } catch (err) {
         console.error("Error fetching payment status:", err);
       }
     };
 
     checkPaymentStatus();
-  }, [username]);
-
-  
-  useEffect(() => {
-    const checkStatus = async () => {
-      if (!username) return;
-      try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment`);
-        const data = await res.json();
-
-        const userPayment = data.find((p) => p.username === username);
-        if (userPayment && userPayment.status === "approved") {
-          setStatusPayment(true);
-        } else {
-          setStatusPayment(false);
-        }
-      } catch (err) {
-        console.error("Error fetching payment status:", err);
-      }
-    };
-
-    checkStatus();
-  }, [username]);
+  }, [username, token, navigate]);
 
   return (
     <>

@@ -8,6 +8,7 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("count");
+    localStorage.removeItem("role");
     navigate("/login");
   };
   const handleAdmin = ()=>{

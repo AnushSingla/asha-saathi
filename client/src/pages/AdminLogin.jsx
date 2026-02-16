@@ -23,8 +23,16 @@ const AdminLogin = () => {
       const data = await res.json();
       
       if (res.ok) {
+        if (data.role !== "admin") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("username");
+          localStorage.removeItem("role");
+          alert("This account does not have admin access.");
+          return;
+        }
         localStorage.setItem("token", data.token);
         localStorage.setItem("username",data.username);
+        localStorage.setItem("role", data.role || "user");
         setUsername(data.username);
         navigate("/admin");
       } else {

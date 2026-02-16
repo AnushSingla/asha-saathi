@@ -25,6 +25,7 @@ const Register = () => {
       setPasswordTouched(true);
       return;
     }
+    setIsLoading(true);
     try{
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, {
       method: "POST",
@@ -33,8 +34,9 @@ const Register = () => {
     });
     const data = await res.json();
     if (res.ok) {
-        
+        localStorage.setItem("token", data.token);
         localStorage.setItem("username", data.user.username);
+        localStorage.setItem("role", data.role || "user");
         alert("Registration successful!");
         navigate("/home"); 
       } else {

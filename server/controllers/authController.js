@@ -7,7 +7,14 @@ exports.register = async (req, res) => {
   try {
     console.log("Register request body:", req.body);
 
-    const { username, email, password } = req.body;
+    const { username, email, password, role, adminSecret } = req.body;
+    const requestedRole = role === "admin" ? "admin" : "user";
+
+    if (requestedRole === "admin") {
+      if (!process.env.ADMIN_SECRET || adminSecret !== process.env.ADMIN_SECRET) {
+        return res.status(403).json({ message: "Invalid admin registration secret" });
+      }
+    }
 
     // Server-side strong password validation
     const passwordErrors = [];
@@ -32,11 +39,29 @@ exports.register = async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      role: requestedRole,
     });
 
     console.log("New user created:", newUser);
 
-    res.status(201).json({ message: "User registered", user: newUser });
+    const userRole = newUser.role || "user";
+    const token = jwt.sign(
+      { userId: newUser._id, username: newUser.username, role: userRole },
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
+    );
+
+    res.status(201).json({
+      message: "User registered",
+      token,
+      role: userRole,
+      user: {
+        _id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+        role: userRole,
+      },
+    });
   } catch (err) {
     console.error(" Registration error:", err);
     res.status(500).json({ error: "Registration failed", details: err.message });
@@ -51,13 +76,13 @@ exports.login = async(req,res)=>{
         if(!user) return res.status(404).json({message:"User doesn't exist"})
         const matchuser = await bcryptjs.compare(password,user.password)
         if(!matchuser) return res.status(401).json({message:"Invalid Credentials"});
+        const userRole = user.role || "user";
 
-        const token = jwt.sign({userId:user._id,username:user.username},process.env.JWT_SECRET,{
+        const token = jwt.sign({userId:user._id,username:user.username, role: userRole},process.env.JWT_SECRET,{
             expiresIn : "2h",
         });
-        res.json({message:"Login successful",token,username:user.username})
+        res.json({message:"Login successful",token,username:user.username, role: userRole})
     }catch(err){
         res.status(500).json({message:"Login Failed"})
     }
 };
-

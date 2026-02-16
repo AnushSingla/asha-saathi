@@ -1,17 +1,31 @@
 import React, { useState, useEffect } from "react";
 import AdminNavbar from "../components/AdminNavbar";
+import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
+  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState(false);
   const [closedBoxes, setClosedBoxes] = useState([]);
   const [upi, setUpi] = useState("");
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const fetchRequests = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment`);
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.status === 401 || res.status === 403) {
+        alert("Admin access required. Please login as admin.");
+        navigate("/adminl");
+        return;
+      }
       const data = await res.json();
       setRequests(data || []);
     } catch (err) {
@@ -26,9 +40,15 @@ const Admin = () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ status: "approved" })
       });
+
+      if (res.status === 401 || res.status === 403) {
+        alert("Admin access required. Please login as admin.");
+        navigate("/adminl");
+        return;
+      }
 
       const data = await res.json();
       if (data.status === "approved") {
