@@ -13,6 +13,7 @@ const AdminRegister = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [adminSecret, setAdminSecret] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
@@ -25,16 +26,18 @@ const AdminRegister = () => {
       setPasswordTouched(true);
       return;
     }
+    setIsLoading(true);
     try{
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-type": "application/json" },
-      body: JSON.stringify({ username, email, password }),
+      body: JSON.stringify({ username, email, password, role: "admin", adminSecret }),
     });
     const data = await res.json();
     if (res.ok) {
-        
+        localStorage.setItem("token", data.token);
         localStorage.setItem("username", data.user.username);
+        localStorage.setItem("role", data.role || "admin");
         alert("Registration successful!");
         navigate("/admin"); 
       } else {
@@ -132,6 +135,29 @@ const AdminRegister = () => {
               </div>
             </div>
             
+            {/* Password input */}
+            <div className="relative group">
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">
+                Admin Secret
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  placeholder="Enter admin registration secret"
+                  value={adminSecret}
+                  onChange={(e) => setAdminSecret(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-2xl 
+                           text-gray-800 placeholder-gray-400 
+                           focus:border-[#67C6E3] focus:bg-white focus:outline-none 
+                           transition-all duration-300 
+                           shadow-[inset_0_2px_10px_rgba(0,0,0,0.05)]
+                           hover:bg-white hover:border-gray-300"
+                  required
+                />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#67C6E3]/0 via-[#67C6E3]/10 to-[#67C6E3]/0 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              </div>
+            </div>
+
             {/* Password input */}
             <div className="relative group">
               <label className="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">

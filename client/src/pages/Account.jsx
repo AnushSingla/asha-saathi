@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 
@@ -10,25 +10,68 @@ const Account = () => {
   const [payment, setPayment] = useState(0);
   const [sentRequest, setSentRequest] = useState(false);
   const [statusPayment, setStatusPayment] = useState(false);
+  const token = localStorage.getItem("token");
 
-  // ✅ Payment request to Admin
+  const getAuthHeaders = () => {
+    if (!token) return {};
+    return { Authorization: `Bearer ${token}` };
+  };
+
+  const fetchPaymentStats = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment/stats`, {
+        headers: getAuthHeaders(),
+      });
+
+      if (res.status === 401) {
+        navigate("/login");
+        return;
+      }
+
+      if (!res.ok) {
+        return;
+      }
+
+      const data = await res.json();
+      setCount(Number(data.count || 0));
+      setCredits(Number(data.credits || 0));
+      setPayment(Number(data.payment || 0));
+      setSentRequest(Boolean(data.hasPendingRequest));
+      setStatusPayment(Boolean(data.hasApprovedRequest));
+    } catch (err) {
+      console.error("Error fetching payment stats:", err);
+    }
+  }, [token, navigate]);
+
   const handlePayment = async (e) => {
     e.preventDefault();
+    if (!token) {
+      alert("Please login first.");
+      navigate("/login");
+      return;
+    }
+
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/request`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, count, credits, payment }),
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({}),
       });
+      const data = await response.json();
 
       if (response.ok) {
-        setSentRequest(true);
+        await fetchPaymentStats();
         alert("Payment request sent to Admin!");
         setTimeout(() => {
           navigate("/home");
         }, 1000);
+      } else if (response.status === 401) {
+        alert("Session expired. Please login again.");
+        navigate("/login");
       } else {
-        alert("Payment request failed");
+        alert(data.message || "Payment request failed");
       }
     } catch (error) {
       console.error("Payment Request Error:", error);
@@ -36,34 +79,27 @@ const Account = () => {
     }
   };
 
-  // ✅ Clear payment + reset counts but keep username
   const handleReset = async () => {
+    if (!token) {
+      alert("Please login first.");
+      navigate("/login");
+      return;
+    }
+
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment/reset`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username }),
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        console.log("Reset successful:", data);
-
-        // Reset all counters
-        setCount(0);
-        setCredits(0);
-        setPayment(0);
-
-        // Reset payment request states
-        setSentRequest(false);
-        setStatusPayment(false);
-
-        // Clear localStorage count
-        localStorage.removeItem(`count_${username}`);
-        localStorage.setItem(`count_${username}`, 0);
-
+        await fetchPaymentStats();
         alert("Payment cleared! You can start new summaries now.");
+      } else if (res.status === 401) {
+        alert("Session expired. Please login again.");
+        navigate("/login");
       } else {
         console.warn("Reset failed:", data);
         alert(`Payment reset failed: ${data.message || data.error || "Unknown error"}`);
@@ -74,7 +110,6 @@ const Account = () => {
     }
   };
 
-  // ✅ Load username from localStorage
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
     if (storedUsername && storedUsername !== "undefined") {
@@ -82,64 +117,10 @@ const Account = () => {
     }
   }, []);
 
-  // ✅ Load saved count/credits/payment from localStorage
   useEffect(() => {
-    const savedUsername = localStorage.getItem("username");
-    if (savedUsername) {
-      const savedCount = localStorage.getItem(`count_${savedUsername}`);
-      if (savedCount) {
-        setCount(Number(savedCount));
-        const calcCredits = Number(savedCount) * 20;
-        const calcPayment = Number(savedCount) * 2000;
-        setCredits(calcCredits);
-        setPayment(calcPayment);
-      }
-    }
-  }, []);
-
-  // ✅ Check if payment is pending
-  useEffect(() => {
-    const checkPaymentStatus = async () => {
-      if (!username) return;
-      try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment`);
-        const data = await res.json();
-
-        const userPayment = data.find((p) => p.username === username);
-        if (userPayment && userPayment.status === "pending") {
-          setSentRequest(true);
-        } else {
-          setSentRequest(false);
-        }
-      } catch (err) {
-        console.error("Error fetching payment status:", err);
-      }
-    };
-
-    checkPaymentStatus();
-  }, [username]);
-
-  
-  useEffect(() => {
-    const checkStatus = async () => {
-      if (!username) return;
-      try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment`);
-        const data = await res.json();
-
-        const userPayment = data.find((p) => p.username === username);
-        if (userPayment && userPayment.status === "approved") {
-          setStatusPayment(true);
-        } else {
-          setStatusPayment(false);
-        }
-      } catch (err) {
-        console.error("Error fetching payment status:", err);
-      }
-    };
-
-    checkStatus();
-  }, [username]);
+    if (!username || !token) return;
+    fetchPaymentStats();
+  }, [username, token, fetchPaymentStats]);
 
   return (
     <>
