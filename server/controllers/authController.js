@@ -1,6 +1,8 @@
 const User = require("../models/User")
 const bcryptjs = require("bcryptjs")
 const jwt = require("jsonwebtoken");
+const admin = require("../firebase");
+const crypto = require("crypto");
 
 
 exports.register = async (req, res) => {
@@ -85,4 +87,36 @@ exports.login = async(req,res)=>{
     }catch(err){
         res.status(500).json({message:"Login Failed"})
     }
+
+    const { email, name, uid } = decodedToken;
+    console.log("Google Auth attempt for:", email);
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      const randomPassword = crypto.randomBytes(16).toString('hex');
+      const hashedPassword = await bcryptjs.hash(randomPassword, 10);
+
+      user = await User.create({
+        username: name || email.split('@')[0],
+        email,
+        password: hashedPassword,
+      });
+      console.log("New user created via Google Auth:", user.email);
+
+      const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, {
+        expiresIn: "2h",
+      });
+      return res.status(201).json({ message: "User registered via Google", token, user });
+    } else {
+      const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, {
+        expiresIn: "2h",
+      });
+      return res.status(200).json({ message: "Login successful", token, username: user.username });
+    }
+
+  } catch (err) {
+    console.error("Google Auth Error:", err);
+    res.status(500).json({ message: "Google Authentication failed", details: err.message });
+  }
 };
