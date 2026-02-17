@@ -1,6 +1,8 @@
 const User = require("../models/User")
 const bcryptjs = require("bcryptjs")
 const jwt = require("jsonwebtoken");
+const admin = require("../firebase");
+const crypto = require("crypto");
 
 
 exports.register = async (req, res) => {
@@ -44,20 +46,71 @@ exports.register = async (req, res) => {
 };
 
 
-exports.login = async(req,res)=>{
-    const {email,password} = req.body;
-    try{
-        const user = await User.findOne({email});
-        if(!user) return res.status(404).json({message:"User doesn't exist"})
-        const matchuser = await bcryptjs.compare(password,user.password)
-        if(!matchuser) return res.status(401).json({message:"Invalid Credentials"});
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User doesn't exist" })
+    const matchuser = await bcryptjs.compare(password, user.password)
+    if (!matchuser) return res.status(401).json({ message: "Invalid Credentials" });
 
-        const token = jwt.sign({userId:user._id,username:user.username},process.env.JWT_SECRET,{
-            expiresIn : "2h",
-        });
-        res.json({message:"Login successful",token,username:user.username})
-    }catch(err){
-        res.status(500).json({message:"Login Failed"})
-    }
+    const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, {
+      expiresIn: "2h",
+    });
+    res.json({ message: "Login successful", token, username: user.username })
+  } catch (err) {
+    res.status(500).json({ message: "Login Failed" })
+  }
 };
+
+exports.googleAuth = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({ message: "No token provided" });
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = await admin.auth().verifyIdToken(idToken);
+    } catch (error) {
+      console.error("Error verifying ID token:", error);
+      return res.status(500).json({ message: "Authentication service not fully configured", error: error.message });
+    }
+
+    const { email, name, uid } = decodedToken;
+    console.log("Google Auth attempt for:", email);
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      const randomPassword = crypto.randomBytes(16).toString('hex');
+      const hashedPassword = await bcryptjs.hash(randomPassword, 10);
+
+      user = await User.create({
+        username: name || email.split('@')[0],
+        email,
+        password: hashedPassword,
+      });
+      console.log("New user created via Google Auth:", user.email);
+
+      const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, {
+        expiresIn: "2h",
+      });
+      return res.status(201).json({ message: "User registered via Google", token, user });
+    } else {
+      const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, {
+        expiresIn: "2h",
+      });
+      return res.status(200).json({ message: "Login successful", token, username: user.username });
+    }
+
+  } catch (err) {
+    console.error("Google Auth Error:", err);
+    res.status(500).json({ message: "Google Authentication failed", details: err.message });
+  }
+};
+
+
 
