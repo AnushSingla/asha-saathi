@@ -9,6 +9,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminRegister from "./pages/AdminRegister";
 import Admin from "./pages/Admin";
 import Asha from "./pages/Asha";
+import AdminRoute from "./components/AdminRoute";
 
 
 
@@ -22,10 +23,10 @@ const App = () =>{
         <Route path="/home"  element={<Home/>}/>
         <Route path = "/medication" element={<Medication/>}/>
         <Route path = "/account" element={<Account/>}/>
-        <Route path = "/admin" element={<Admin/>}/>
+        <Route path = "/admin" element={<AdminRoute><Admin/></AdminRoute>}/>
         <Route path = "/adminr" element={<AdminRegister/>}/>
         <Route path = "/adminl" element={<AdminLogin/>}/>
-        <Route path = "/asha" element={<Asha/>}/>
+        <Route path = "/asha" element={<AdminRoute><Asha/></AdminRoute>}/>
       </Routes>
     </Router>
     
