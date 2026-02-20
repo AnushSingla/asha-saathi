@@ -65,8 +65,9 @@ const Register = () => {
 
       const data = await res.json();
       if (res.ok) {
-        localStorage.setItem("username", data.user.username);
-        localStorage.setItem("token", data.token); // Store token if backend returns it
+        localStorage.setItem("username", data.user?.username || data.username);
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role || "user");
         alert("Google Registration successful!");
         navigate("/home");
       } else {
