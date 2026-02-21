@@ -1,3 +1,48 @@
+// Google authentication controller
+exports.googleAuth = async (req, res) => {
+  const { idToken } = req.body;
+  if (!idToken) {
+    return res.status(400).json({ message: "Missing idToken" });
+  }
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const { email, name, uid } = decodedToken;
+    if (!email) {
+      return res.status(400).json({ message: "Google account must have an email" });
+    }
+    let user = await User.findOne({ email });
+    if (!user) {
+      // Create a random password for new users
+      const randomPassword = crypto.randomBytes(16).toString('hex');
+      const hashedPassword = await bcryptjs.hash(randomPassword, 10);
+      user = await User.create({
+        username: name || email.split('@')[0],
+        email,
+        password: hashedPassword,
+        role: "user",
+      });
+    }
+    
+    // Check if JWT_SECRET is defined
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not defined in environment variables");
+      return res.status(500).json({ error: "Server configuration error: JWT_SECRET not set" });
+    }
+    
+    const token = jwt.sign({ userId: user._id, username: user.username, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "2h",
+    });
+    res.status(200).json({ 
+      message: "Google authentication successful", 
+      token, 
+      user: { username: user.username },
+      role: user.role 
+    });
+  } catch (err) {
+    console.error("Google Auth Error:", err);
+    res.status(401).json({ message: "Invalid Google token", error: err.message });
+  }
+};
 const User = require("../models/User")
 const bcryptjs = require("bcryptjs")
 const jwt = require("jsonwebtoken");
@@ -46,6 +91,12 @@ exports.register = async (req, res) => {
 
     console.log("New user created:", newUser);
 
+    // Check if JWT_SECRET is defined
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not defined in environment variables");
+      return res.status(500).json({ error: "Server configuration error: JWT_SECRET not set" });
+    }
+    
     const userRole = newUser.role || "user";
     const token = jwt.sign(
       { userId: newUser._id, username: newUser.username, role: userRole },
@@ -87,36 +138,4 @@ exports.login = async(req,res)=>{
     }catch(err){
         res.status(500).json({message:"Login Failed"})
     }
-
-    const { email, name, uid } = decodedToken;
-    console.log("Google Auth attempt for:", email);
-
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      const randomPassword = crypto.randomBytes(16).toString('hex');
-      const hashedPassword = await bcryptjs.hash(randomPassword, 10);
-
-      user = await User.create({
-        username: name || email.split('@')[0],
-        email,
-        password: hashedPassword,
-      });
-      console.log("New user created via Google Auth:", user.email);
-
-      const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, {
-        expiresIn: "2h",
-      });
-      return res.status(201).json({ message: "User registered via Google", token, user });
-    } else {
-      const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, {
-        expiresIn: "2h",
-      });
-      return res.status(200).json({ message: "Login successful", token, username: user.username });
-    }
-
-  } catch (err) {
-    console.error("Google Auth Error:", err);
-    res.status(500).json({ message: "Google Authentication failed", details: err.message });
-  }
-};
+}

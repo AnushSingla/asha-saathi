@@ -57,8 +57,9 @@ const Login = () => {
 
       if (res.ok) {
         localStorage.setItem("token", data.token);
-        localStorage.setItem("username", data.username);
-        setUsername(data.username);
+        localStorage.setItem("username", data.user?.username || data.username);
+        localStorage.setItem("role", data.role || "user");
+        setUsername(data.user?.username || data.username);
         alert("Google Login successful!");
         navigate("/home");
       } else {
