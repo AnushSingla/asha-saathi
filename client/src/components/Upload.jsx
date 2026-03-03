@@ -1,6 +1,11 @@
 import { useState  } from "react";
 import { useNavigate } from "react-router-dom";
 
+const SUPPORTED_FILE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
 
 const Upload = () => {
   const [rawtext, setRawText] = useState("");
@@ -18,7 +23,17 @@ const Upload = () => {
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) return alert("Upload a File");
+
+    if (!SUPPORTED_FILE_TYPES.includes(file.type)) {
+      alert("Please upload a JPG, PNG, or WEBP image.");
+      return;
+    }
+
     setLoading(true);
+    setRawText("");
+    setEnglishSummary("");
+    setHindiSummary("");
+    setMedSummary("");
     const formdata = new FormData();
     formdata.append("report", file);
     formdata.append("phone", phone);
@@ -87,7 +102,7 @@ const Upload = () => {
         <div className="bg-white/60 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 border border-white/50 transform transition-all duration-500 hover:shadow-[0_20px_80px_rgba(103,198,227,0.3)]">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Upload Medical Report</h2>
-            <p className="text-gray-600">Select a medical report file to analyze and get multilingual summaries</p>
+            <p className="text-gray-600">Upload a clear JPG, PNG, or WEBP image of the report for multilingual analysis</p>
           </div>
           
           <form onSubmit={handleUpload} className="space-y-6">
@@ -100,7 +115,7 @@ const Upload = () => {
                   type="file"
                   onChange={(e) => setFile(e.target.files[0])}
                   className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-[#67C6E3] file:to-[#5BB8D8] file:text-white hover:file:shadow-lg file:transition-all file:cursor-pointer cursor-pointer"
-                  accept=".pdf,.doc,.docx,.txt"
+                  accept="image/png,image/jpeg,image/webp"
                 />
                 {file && (
                   <div className="mt-3 flex items-center justify-center gap-2">
@@ -108,6 +123,9 @@ const Upload = () => {
                   </div>
                 )}
               </div>
+              <p className="mt-2 text-sm text-gray-500">
+                Supported files: JPG, PNG, WEBP
+              </p>
             </div>
             
             <button

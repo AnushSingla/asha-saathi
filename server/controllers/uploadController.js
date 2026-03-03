@@ -3,9 +3,21 @@ const Tesseract = require('tesseract.js');
 const fs = require('fs');
 const User = require("../models/User");
 
+const supportedMimeTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
 exports.Upload = async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "Report file is required" });
+  }
+
+  if (!supportedMimeTypes.has(req.file.mimetype)) {
+    return res
+      .status(400)
+      .json({ error: "Unsupported file type. Please upload a JPG, PNG, or WEBP image." });
   }
 
   const filePath = req.file.path;
