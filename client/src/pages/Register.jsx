@@ -53,6 +53,10 @@ const Register = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!auth || !googleProvider) {
+      alert("Google Sign-In is unavailable: Firebase is not configured.");
+      return;
+    }
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
