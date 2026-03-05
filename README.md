@@ -78,6 +78,76 @@ cd frontend
 npm install
 npm run dev
 
+---
+
+# 🔧 Environment Setup (Frontend)
+
+The frontend requires a `.env` file to connect to Firebase and the backend API.  
+Without it, authentication features will be disabled and API calls will fail.
+
+### 1️⃣ Create a `.env` file inside the `client` directory
+
+```bash
+cd client
+cp .env.example .env
+```
+
+> On Windows (Command Prompt):
+> ```cmd
+> copy .env.example .env
+> ```
+
+---
+
+### 2️⃣ Copy variables from `.env.example`
+
+Open `client/.env` — it will look like this:
+
+```env
+VITE_BACKEND_URL=http://localhost:5000
+
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+---
+
+### 3️⃣ Add your Firebase project credentials
+
+1. Go to the [Firebase Console](https://console.firebase.google.com) and open your project.
+2. Navigate to **Project Settings → General → Your apps → SDK setup and configuration**.
+3. Select **Config** and copy the values into your `.env` file:
+
+| Variable | Where to find it |
+|---|---|
+| `VITE_FIREBASE_API_KEY` | `apiKey` in the Firebase config object |
+| `VITE_FIREBASE_AUTH_DOMAIN` | `authDomain` — usually `<project-id>.firebaseapp.com` |
+| `VITE_FIREBASE_PROJECT_ID` | `projectId` |
+| `VITE_FIREBASE_STORAGE_BUCKET` | `storageBucket` — usually `<project-id>.appspot.com` |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | `messagingSenderId` |
+| `VITE_FIREBASE_APP_ID` | `appId` |
+
+> ⚠️ **All six Firebase variables are required.** If any are missing, Firebase will not initialise and Google Sign-In / email authentication will be unavailable. The rest of the app will still render normally.
+
+---
+
+### 4️⃣ Restart the development server
+
+After saving your `.env` file, restart Vite so it picks up the new variables:
+
+```bash
+# Stop the running dev server (Ctrl + C), then:
+npm run dev
+```
+
+> Vite only reads `.env` at startup — changes to the file require a restart to take effect.
+
+---
+
 ➡️ App Runs On
 
 Link -> https://asha-delta.vercel.app/

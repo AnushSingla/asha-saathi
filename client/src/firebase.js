@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-const REQUIRED_ENV_VARS = {
+const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -10,7 +10,7 @@ const REQUIRED_ENV_VARS = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const missingVars = Object.entries(REQUIRED_ENV_VARS)
+const missingVars = Object.entries(firebaseConfig)
   .filter(([, value]) => !value)
   .map(([key]) => `VITE_FIREBASE_${key.replace(/([A-Z])/g, "_$1").toUpperCase()}`);
 
@@ -25,11 +25,15 @@ if (missingVars.length > 0) {
   );
 } else {
   try {
-    const app = initializeApp(REQUIRED_ENV_VARS);
+    const app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     googleProvider = new GoogleAuthProvider();
   } catch (error) {
-    console.error("[Firebase] Failed to initialize:", error.message);
+    if (error instanceof Error) {
+      console.error("[Firebase] Failed to initialize:", error);
+    } else {
+      console.error("[Firebase] Failed to initialize. Non-Error thrown:", error);
+    }
   }
 }
 
