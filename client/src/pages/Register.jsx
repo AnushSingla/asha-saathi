@@ -220,11 +220,6 @@ const Register = () => {
 };
 
 export default Register;
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [passwordTouched, setPasswordTouched] = useState(false);
-
-  const isPasswordStrong = passwordRules.every((rule) => rule.test(password));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
