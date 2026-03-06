@@ -1,4 +1,4 @@
-import { useState  } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 
@@ -6,12 +6,35 @@ const Upload = () => {
   const [rawtext, setRawText] = useState("");
   const [englishSummary, setEnglishSummary] = useState("");
   const [hindiSummary, setHindiSummary] = useState("");
-  const[medSummary,setMedSummary] = useState("");
+  const [medSummary, setMedSummary] = useState("");
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("English");
-  const[phone,setPhone]= useState("");
+  const [phone, setPhone] = useState("");
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
+
+  const handleFile = (selectedFile) => {
+    if (selectedFile) setFile(selectedFile);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const dropped = e.dataTransfer.files[0];
+    if (dropped) handleFile(dropped);
+  };
   
   
 
