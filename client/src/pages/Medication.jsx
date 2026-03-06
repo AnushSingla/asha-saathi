@@ -104,6 +104,7 @@ const Medication = () => {
             </div>
             <input
               type="text"
+              aria-label="Search medication or condition"
               placeholder="Search medication or condition..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
