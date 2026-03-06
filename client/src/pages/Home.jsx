@@ -232,9 +232,9 @@ const Home = () => {
             © {new Date().getFullYear()} Asha Saathi — Making healthcare accessible for everyone.
           </p>
           <div className="flex gap-5 text-xs">
-            <span className="hover:text-gray-200 cursor-pointer transition-colors">Privacy</span>
-            <span className="hover:text-gray-200 cursor-pointer transition-colors">Terms</span>
-            <span className="hover:text-gray-200 cursor-pointer transition-colors">Contact</span>
+            <span>Privacy</span>
+            <span>Terms</span>
+            <span>Contact</span>
           </div>
         </div>
       </footer>

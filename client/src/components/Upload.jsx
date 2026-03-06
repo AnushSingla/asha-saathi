@@ -119,17 +119,26 @@ const Upload = () => {
                 ? "border-teal-300 bg-teal-50/50"
                 : "border-gray-200 hover:border-teal-300 hover:bg-gray-50"
             }`}
+            role="button"
+            tabIndex={0}
+            aria-label="Upload medical report by clicking or dragging and dropping a file"
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
           >
             <input
               ref={fileInputRef}
               type="file"
               className="hidden"
               onChange={(e) => handleFile(e.target.files[0])}
-              accept=".jpg,.jpeg,.png,.webp,.pdf"
+              accept={SUPPORTED_FILE_TYPES.join(",")}
             />
 
             {file ? (

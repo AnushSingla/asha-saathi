@@ -18,12 +18,16 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/home")}>
+          <button
+            className="flex items-center gap-2.5"
+            onClick={() => navigate("/home")}
+            aria-label="Go to home"
+          >
             <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
               <div className="w-4 h-4 bg-white rounded-sm"></div>
             </div>
             <span className="text-base font-bold text-gray-900 tracking-tight">Asha Saathi</span>
-          </div>
+          </button>
 
           {/* Nav links */}
           <div className="hidden md:flex items-center gap-1">

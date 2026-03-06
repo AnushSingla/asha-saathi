@@ -11,19 +11,23 @@ const passwordRules = [
   { label: "One special character (!@#$%^&*)", test: (pw) => /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(pw) },
 ];
 
-const InputField = ({ label, type = "text", placeholder, value, onChange, required }) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      required={required}
-      className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-colors"
-    />
-  </div>
-);
+const InputField = ({ label, id, type = "text", placeholder, value, onChange, required }) => {
+  const inputId = id || (typeof label === "string" ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
+  return (
+    <div>
+      <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      <input
+        id={inputId}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        required={required}
+        className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition-colors"
+      />
+    </div>
+  );
+};
 
 const Register = () => {
   const navigate = useNavigate();
@@ -147,22 +151,27 @@ const Register = () => {
                   {passwordRules.map((rule, i) => (
                     <li
                       key={i}
+                      aria-live="polite"
                       className={`flex items-center gap-2 text-xs ${
                         rule.test(password) ? "text-teal-600" : "text-gray-400"
                       }`}
                     >
-                      <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        rule.test(password) ? "bg-teal-100" : "bg-gray-100"
-                      }`}>
+                      <span
+                        aria-hidden="true"
+                        className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          rule.test(password) ? "bg-teal-100" : "bg-gray-100"
+                        }`}
+                      >
                         {rule.test(password) ? (
-                          <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg aria-hidden="true" className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
                         ) : (
-                          <span className="w-1 h-1 rounded-full bg-gray-300 block"></span>
+                          <span aria-hidden="true" className="w-1 h-1 rounded-full bg-gray-300 block"></span>
                         )}
                       </span>
-                      {rule.label}
+                      <span className="sr-only">{rule.label} {rule.test(password) ? "requirement met" : "requirement not met"}</span>
+                      <span aria-hidden="true">{rule.label}</span>
                     </li>
                   ))}
                 </ul>
