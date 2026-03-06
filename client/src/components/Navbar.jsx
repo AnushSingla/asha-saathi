@@ -40,6 +40,7 @@ const Navbar = () => {
               My Account
             </button>
             <button
+              onClick={() => navigate("/medication")}
               className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
             >
               Medication
