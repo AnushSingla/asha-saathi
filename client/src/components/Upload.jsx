@@ -85,185 +85,162 @@ const Upload = () => {
 };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#e0f4f9] via-[#d4eef5] to-[#c8e8f1]">
-      
-      
-      
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-[#67C6E3] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute top-40 right-20 w-72 h-72 bg-[#4FB3D9] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-[#378BA4] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
+    <div className="space-y-5">
 
-      <div className="relative max-w-4xl mx-auto p-6 space-y-6">
-       
-        <div className="text-center py-8">
-          <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#1a5f7a] via-[#67C6E3] to-[#1a5f7a]">
-            Medical Report Analysis
-          </h1>
-          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-            Upload your medical report for AI-powered analysis and get summaries in both English and Hindi
-          </p>
+      {/* Upload card */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="mb-5">
+          <h2 className="text-xl font-semibold text-gray-900">Upload Medical Report</h2>
+          <p className="text-sm text-gray-400 mt-1">Drag & drop or click to select your report</p>
         </div>
 
-        
-        <div className="bg-white/60 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 border border-white/50 transform transition-all duration-500 hover:shadow-[0_20px_80px_rgba(103,198,227,0.3)]">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Upload Medical Report</h2>
-            <p className="text-gray-600">Select a medical report file to analyze and get multilingual summaries</p>
+        <form onSubmit={handleUpload} className="space-y-4">
+          {/* Drag-and-drop zone */}
+          <div
+            className={`border-2 border-dashed rounded-xl py-10 px-6 text-center cursor-pointer transition-all select-none ${
+              dragOver
+                ? "border-teal-400 bg-teal-50"
+                : file
+                ? "border-teal-300 bg-teal-50/50"
+                : "border-gray-200 hover:border-teal-300 hover:bg-gray-50"
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={(e) => handleFile(e.target.files[0])}
+              accept=".jpg,.jpeg,.png,.webp,.pdf"
+            />
+
+            {file ? (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-sm font-medium text-teal-700 max-w-[220px] truncate">{file.name}</p>
+                <p className="text-xs text-gray-400">Click to change file</p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center">
+                  <svg className="w-7 h-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">
+                    Drag & drop your medical report or{" "}
+                    <span className="text-teal-600 font-semibold">click to upload</span>
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1.5">Supported formats: JPG, PNG, WEBP</p>
+                </div>
+              </div>
+            )}
           </div>
-          
-          <form onSubmit={handleUpload} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Medical Report File
-              </label>
-              <div className="border-2 border-dashed border-[#67C6E3]/40 rounded-2xl p-6 text-center hover:border-[#67C6E3]/60 transition-all bg-white/50 backdrop-blur-sm">
-                <input
-                  type="file"
-                  onChange={(e) => setFile(e.target.files[0])}
-                  className="w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-[#67C6E3] file:to-[#5BB8D8] file:text-white hover:file:shadow-lg file:transition-all file:cursor-pointer cursor-pointer"
-                  accept=".pdf,.doc,.docx,.txt"
-                />
-                {file && (
-                  <div className="mt-3 flex items-center justify-center gap-2">
-                    <span className="text-sm font-medium text-[#67C6E3]">📄 {file.name}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <button
-              type="submit"
-              disabled={!file || loading}
-              className="relative w-full py-4 px-6 overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              
-              <div className="absolute inset-0 bg-gradient-to-br from-[#67C6E3] to-[#4FB3D9] rounded-2xl transform transition-transform duration-200 group-hover:scale-[0.98] group-active:scale-95"></div>
-              <div className="absolute inset-0 bg-gradient-to-br from-[#5BB8D8] to-[#378BA4] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="absolute inset-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),inset_0_-1px_1px_rgba(0,0,0,0.2)] rounded-2xl"></div>
-              
-              
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-              </div>
-              
-              <span className="relative text-white font-bold text-lg tracking-wide drop-shadow-lg">
-                {loading ? "Processing Report..." : "Analyze Report"}
+
+          {/* Analyze button */}
+          <button
+            type="submit"
+            disabled={!file || loading}
+            className="w-full py-3 px-6 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors text-sm"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Processing Report...
               </span>
-            </button>
-            
-          </form>
-        </div>
-
-        
-        {loading && (
-          <div className="bg-white/60 backdrop-blur-2xl rounded-3xl shadow-xl p-8 text-center border border-white/50">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#67C6E3] to-[#5BB8D8] rounded-2xl animate-pulse mb-4 shadow-lg">
-              <div className="w-8 h-8 bg-white/90 rounded-xl"></div>
-            </div>
-            <p className="text-lg font-semibold text-[#67C6E3] mb-2">Processing The Report...</p>
-            <p className="text-gray-600">This may take a few moments</p>
-          </div>
-        )}
-
-       
-        {!loading && (englishSummary || hindiSummary) && (
-          <div className="bg-white/60 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 border border-white/50">
-            <div className="mb-6">
-              
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Report Summary</h2>
-              <p className="text-gray-600">Your medical report has been analyzed. Choose your preferred language below.</p>
-            </div>
-            
-            
-            <div className="flex gap-3 mb-6">
-              <button
-                onClick={() => setLanguage("English")}
-                className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 shadow-md ${
-                  language === "English"
-                    ? "bg-gradient-to-r from-[#67C6E3] to-[#5BB8D8] text-white shadow-lg scale-105"
-                    : "bg-white/80 text-gray-700 hover:bg-white"
-                }`}
-              >
-                🌐 English Summary
-              </button>
-              <button
-                onClick={() => setLanguage("Hindi")}
-                className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 shadow-md ${
-                  language === "Hindi"
-                    ? "bg-gradient-to-r from-[#67C6E3] to-[#5BB8D8] text-white shadow-lg scale-105"
-                    : "bg-white/80 text-gray-700 hover:bg-white"
-                }`}
-              >
-                🗣️ हिंदी Summary
-              </button>
-               <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                WhatsApp Number (with country code)
-              </label>
-              <input
-                type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. 919876543210"
-                className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-[#67C6E3] outline-none"
-              />
-            </div>
-              <button onClick={handlesharemedications} className="px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 shadow-md bg-gradient-to-r from-[#67C6E3] to-[#5BB8D8] text-white  scale-105">
-                📤 Share Medications</button>
-            </div>
-
-            
-            {language === "English" && englishSummary && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 bg-[#67C6E3]/20 text-[#67C6E3] rounded-full text-sm font-medium">
-                    English
-                  </span>
-                  <h3 className="text-lg font-semibold text-gray-800">Report Summary</h3>
-                </div>
-                <div className="p-5 bg-white/70 backdrop-blur-sm rounded-2xl border-l-4 border-[#67C6E3] shadow-md">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-700">{englishSummary}</p>
-                </div>
-              </div>
+            ) : (
+              "Analyze Report"
             )}
-
-         
-            {language === "Hindi" && hindiSummary && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 bg-[#67C6E3]/20 text-[#67C6E3] rounded-full text-sm font-medium">
-                    हिंदी
-                  </span>
-                  <h3 className="text-lg font-semibold text-gray-800">रिपोर्ट सारांश</h3>
-                </div>
-                <div className="p-5 bg-white/70 backdrop-blur-sm rounded-2xl border-l-4 border-[#67C6E3] shadow-md">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-700">{hindiSummary}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          </button>
+        </form>
       </div>
 
-      
-      <style jsx>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
+      {/* Loading indicator */}
+      {loading && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
+          <div className="inline-flex items-center gap-3 text-teal-600">
+            <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span className="font-medium text-sm">Analyzing your report — this may take a moment…</span>
+          </div>
+        </div>
+      )}
+
+      {/* Results */}
+      {!loading && (englishSummary || hindiSummary) && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-1">Report Summary</h2>
+          <p className="text-sm text-gray-400 mb-5">Choose your preferred language below.</p>
+
+          {/* Controls row */}
+          <div className="flex flex-wrap items-center gap-3 mb-5">
+            <button
+              onClick={() => setLanguage("English")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                language === "English"
+                  ? "bg-teal-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              🌐 English
+            </button>
+            <button
+              onClick={() => setLanguage("Hindi")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                language === "Hindi"
+                  ? "bg-teal-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              🗣️ हिंदी
+            </button>
+
+            <input
+              type="text"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="WhatsApp number (e.g. 919876543210)"
+              className="flex-1 min-w-[200px] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-300 focus:border-teal-400 outline-none"
+            />
+
+            <button
+              onClick={handlesharemedications}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.549 4.12 1.517 5.854L.057 23.882a.5.5 0 00.606.61l6.163-1.457A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.951 0-3.775-.537-5.328-1.469l-.38-.231-3.938.931.949-3.824-.247-.392A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+              </svg>
+              Share Medications
+            </button>
+          </div>
+
+          {/* Summary text */}
+          {language === "English" && englishSummary && (
+            <div className="p-4 bg-gray-50 rounded-xl border-l-4 border-teal-500">
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{englishSummary}</p>
+            </div>
+          )}
+          {language === "Hindi" && hindiSummary && (
+            <div className="p-4 bg-gray-50 rounded-xl border-l-4 border-teal-500">
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{hindiSummary}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
