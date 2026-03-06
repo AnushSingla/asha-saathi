@@ -1,6 +1,11 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
+const SUPPORTED_FILE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
 
 const Upload = () => {
   const [rawtext, setRawText] = useState("");
@@ -41,7 +46,17 @@ const Upload = () => {
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) return alert("Upload a File");
+
+    if (!SUPPORTED_FILE_TYPES.includes(file.type)) {
+      alert("Please upload a JPG, PNG, or WEBP image.");
+      return;
+    }
+
     setLoading(true);
+    setRawText("");
+    setEnglishSummary("");
+    setHindiSummary("");
+    setMedSummary("");
     const formdata = new FormData();
     formdata.append("report", file);
     formdata.append("phone", phone);
