@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?size=28&color=29A8FF&center=true&vCenter=true&width=700&lines=ASHA+SAATHI+🚑;AI+Health+Assistant;MERN+%7C+Docker+%7C+CI%2FCD+%7C+Jenkins" />
+  <img src="https://readme-typing-svg.herokuapp.com?size=28&color=29A8FF&center=true&vCenter=true&width=700&lines=ASHA+SAATHI+🚑;AI+Health+Assistant;MERN+%7C+Groq+AI+%7C+Docker+%7C+Jenkins" />
 </p>
 
 <p align="center">
@@ -7,34 +7,47 @@
   <img src="https://img.shields.io/badge/DOCKER-AUTOMATED-blue?style=for-the-badge&logo=docker" />
   <img src="https://img.shields.io/badge/CI%2FCD-JENKINS-red?style=for-the-badge&logo=jenkins" />
   <img src="https://img.shields.io/badge/STACK-MERN-success?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/AI-GROQ-orange?style=for-the-badge" />
 </p>
 
 ---
 
 # 🚀 ASHA-SAATHI — AI Health Assistant
 
-ASHA-SAATHI is a MERN + AI powered platform designed to assist ASHA workers by providing:
+ASHA-SAATHI is a MERN + AI powered platform designed to assist ASHA (Accredited Social Health Activist) workers by providing:
 
-- 📄 OCR-based medical report scanning  
-- 🧠 AI-generated multilingual summaries  
-- 🔊 Voice output (Hindi / Punjabi / English)  
-- 🥗 Diet planning & home remedies  
-- 🔍 Early disease detection  
-- 🔄 Fully automated CI/CD using Jenkins  
-- 🐳 Dockerized frontend + backend  
+- 📄 OCR-based medical report scanning (Tesseract.js)
+- 🧠 AI-generated multilingual summaries via Groq AI (Hindi & English)
+- 💊 Medication suggestions & home remedies from report analysis
+- 🥗 Diet planning for rural patients
+- 🔍 Early disease detection support
+- 💰 Credit & payout system for ASHA workers based on reports processed
+- 🔐 JWT + Firebase authentication (email/password & Google Sign-In)
+- 🔄 Fully automated CI/CD using Jenkins
+- 🐳 Dockerized frontend + backend
 
 ---
 
 # 🛠️ Tech Stack
 
 ### **Frontend**
-<img src="https://skillicons.dev/icons?i=react,tailwind,js" />
+<img src="https://skillicons.dev/icons?i=react,tailwind,js,vite,firebase" />
+
+- React 19 + React Router v6
+- Tailwind CSS v4
+- Firebase (Auth — email/password & Google)
+- Vite
 
 ### **Backend**
 <img src="https://skillicons.dev/icons?i=nodejs,express,mongodb" />
 
-### **AI / Cloud**
-<img src="https://skillicons.dev/icons?i=aws" />
+- Node.js + Express 5
+- MongoDB + Mongoose
+- Firebase Admin SDK
+- JWT (jsonwebtoken) + bcryptjs
+- Multer (file uploads)
+- Tesseract.js (OCR)
+- Groq AI via OpenAI-compatible SDK
 
 ### **DevOps**
 <img src="https://skillicons.dev/icons?i=docker,jenkins,github,git,linux" />
@@ -43,12 +56,18 @@ ASHA-SAATHI is a MERN + AI powered platform designed to assist ASHA workers by p
 
 # 📦 Project Structure
 
-/server → Node.js + Express + AI services
-/client → React + Tailwind
-/Jenkinsfile → Jenkins CI/CD pipeline
-/Dockerfile(s) → Multi-stage frontend & backend builds
-
-
+```
+asha-saathi/
+├── client/          → React + Tailwind (Vite)
+├── server/          → Node.js + Express + AI services
+│   ├── api/         → Groq AI client
+│   ├── controllers/ → auth, upload (OCR + AI), payment
+│   ├── middleware/  → JWT auth middleware
+│   ├── models/      → User, Payment (Mongoose)
+│   └── routes/      → /api/auth, /api/upload, /api/payment
+├── docker-compose.yaml
+└── Jenkinsfile      → Jenkins CI/CD pipeline
+```
 
 ---
 
@@ -63,48 +82,38 @@ ASHA-SAATHI is a MERN + AI powered platform designed to assist ASHA workers by p
 ```bash
 git clone https://github.com/YOUR-USERNAME/asha-saathi.git
 cd asha-saathi
+```
 
-🖥️ Backend Setup
+### 🖥️ Backend Setup
 
-
-cd backend
+```bash
+cd server
 npm install
 npm run dev
+```
 
-🌐 Frontend Setup
+> Server runs on **http://localhost:8000**
 
-
-cd frontend
-npm install
-npm run dev
-
----
-
-# 🔧 Environment Setup (Frontend)
-
-The frontend requires a `.env` file to connect to Firebase and the backend API.  
-Without it, authentication features will be disabled and API calls will fail.
-
-### 1️⃣ Create a `.env` file inside the `client` directory
+### 🌐 Frontend Setup
 
 ```bash
 cd client
-cp .env.example .env
+npm install
+npm run dev
 ```
 
-> On Windows (Command Prompt):
-> ```cmd
-> copy .env.example .env
-> ```
+> App runs on **http://localhost:5173**
 
 ---
 
-### 2️⃣ Copy variables from `.env.example`
+# 🔧 Environment Setup
 
-Open `client/.env` — it will look like this:
+## Frontend — `client/.env`
+
+Create a `.env` file inside the `client/` directory:
 
 ```env
-VITE_BACKEND_URL=http://localhost:5000
+VITE_BACKEND_URL=http://localhost:8000
 
 VITE_FIREBASE_API_KEY=
 VITE_FIREBASE_AUTH_DOMAIN=
@@ -114,9 +123,7 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
 ```
 
----
-
-### 3️⃣ Add your Firebase project credentials
+### Firebase credentials
 
 1. Go to the [Firebase Console](https://console.firebase.google.com) and open your project.
 2. Navigate to **Project Settings → General → Your apps → SDK setup and configuration**.
@@ -131,65 +138,100 @@ VITE_FIREBASE_APP_ID=
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | `messagingSenderId` |
 | `VITE_FIREBASE_APP_ID` | `appId` |
 
-> ⚠️ **All six Firebase variables are required.** If any are missing, Firebase will not initialise and Google Sign-In / email authentication will be unavailable. The rest of the app will still render normally.
+> ⚠️ All six Firebase variables are required. Missing values will disable Google Sign-In and email authentication.
 
 ---
 
-### 4️⃣ Restart the development server
+## Backend — `server/.env`
 
-After saving your `.env` file, restart Vite so it picks up the new variables:
+Create a `.env` file inside the `server/` directory:
+
+```env
+MONGO_URL=mongodb+srv://<user>:<password>@cluster.mongodb.net/<dbname>
+JWT_SECRET=your_jwt_secret_key
+
+GROQ_KEY=your_groq_api_key
+
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
+```
+
+| Variable | Where to find it |
+|---|---|
+| `MONGO_URL` | MongoDB Atlas → Connect → Drivers |
+| `JWT_SECRET` | Any random secret string |
+| `GROQ_KEY` | [console.groq.com](https://console.groq.com) → API Keys |
+| `FIREBASE_PROJECT_ID` / `CLIENT_EMAIL` / `PRIVATE_KEY` | Firebase Console → Project Settings → Service Accounts → Generate new private key |
+
+---
+
+### Restart dev servers after updating `.env`
 
 ```bash
-# Stop the running dev server (Ctrl + C), then:
+# Vite only reads .env at startup — restart after changes
 npm run dev
 ```
 
-> Vite only reads `.env` at startup — changes to the file require a restart to take effect.
+---
+
+➡️ **Live App:** https://asha-delta.vercel.app/
 
 ---
 
-➡️ App Runs On
+# 🔹 METHOD 2 — Docker Compose (Recommended)
 
-Link -> https://asha-delta.vercel.app/
+```bash
+git clone https://github.com/YOUR-USERNAME/asha-saathi.git
+cd asha-saathi
 
+# Add server/.env with your secrets (see above), then:
+docker compose up --build
+```
 
-🔹 METHOD 2 — Run Using Docker Hub (No Setup Needed)
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| Backend | http://localhost:8000 |
 
-🐳 Pull Frontend Image
+---
 
+# 🔹 METHOD 3 — Run Using Docker Hub (No Build Needed)
+
+### 🐳 Pull & Run Frontend
+
+```bash
 docker pull anushsingla/asha-saathi:frontend
+docker run -d -p 3000:80 --name asha-frontend anushsingla/asha-saathi:frontend
+```
 
-Run Frontend
+### 🐳 Pull & Run Backend
 
-docker run -d -p 80:80 --name asha-frontend anushsingla/asha-saathi:frontend
-🐳 Pull Backend Image
-
-
+```bash
 docker pull anushsingla/asha-saathi:backend
+docker run -d -p 8000:8000 --name asha-backend anushsingla/asha-saathi:backend
+```
 
-Run Backend
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| Backend | http://localhost:8000 |
 
-docker run -d -p 5000:5000 --name asha-backend anushsingla/asha-saathi:backend
+---
 
-🎯 App is Live At 
+# 🔗 CI/CD Pipeline (Jenkins)
 
-Frontend: Frontend-Staging-image
+✔ Auto-build Node.js + React on push  
+✔ Automated version bumping  
+✔ Docker build & push to Docker Hub  
+✔ SSH deploy to server  
+✔ GitHub Webhook triggers  
 
-Backend: http://localhost:8000
+---
 
-🔗 CI/CD Pipeline (Jenkins)
+# ⭐ Support
 
-✔ Auto-build Node.js + React
-✔ Automated version bumping
-✔ Docker build & push to Docker Hub
-✔ SSH deploy to server
-✔ GitHub Webhook triggers
-
-
-⭐ Support
-⭐ Star this repo
-🍴 Fork it
-🐛 Open issues
-🚀 Contribute
-
- ```
+- ⭐ Star this repo  
+- 🍴 Fork it  
+- 🐛 Open issues  
+- 🚀 Contribute — see [CONTRIBUTING.md](CONTRIBUTING.md)
